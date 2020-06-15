@@ -30,7 +30,7 @@ class labelme2coco(object):
         for num, json_file in enumerate(self.labelme_json):
             with open(json_file, "r") as fp:
                 data = json.load(fp)
-                self.images.append(self.image(data, num))
+                self.images.append(self.image(data, num, json_file))
                 for shapes in data["shapes"]:
                     label = shapes["label"].split("_")
                     if label not in self.label:
@@ -46,7 +46,7 @@ class labelme2coco(object):
         for annotation in self.annotations:
             annotation["category_id"] = self.getcatid(annotation["category_id"])
 
-    def image(self, data, num):
+    def image(self, data, num, json_file):
         image = {}
         img = utils.img_b64_to_arr(data["imageData"])
         height, width = img.shape[:2]
@@ -54,7 +54,7 @@ class labelme2coco(object):
         image["height"] = height
         image["width"] = width
         image["id"] = num
-        image["file_name"] = data["imagePath"]
+        image["file_name"] = json_file
 
         self.height = height
         self.width = width
