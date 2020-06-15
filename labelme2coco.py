@@ -15,6 +15,7 @@ class labelme2coco(object):
         :param save_json_path: the path to save new json
         """
         self.labelme_json = labelme_json
+        self.dir_name = os.path.split(labelme_json[0])[0]
         self.save_json_path = save_json_path
         self.images = []
         self.categories = []
@@ -30,7 +31,7 @@ class labelme2coco(object):
         for num, json_file in enumerate(self.labelme_json):
             with open(json_file, "r") as fp:
                 data = json.load(fp)
-                self.images.append(self.image(data, num, json_file))
+                self.images.append(self.image(data, num))
                 for shapes in data["shapes"]:
                     label = shapes["label"]
                     if label not in self.label:
@@ -46,7 +47,7 @@ class labelme2coco(object):
         for annotation in self.annotations:
             annotation["category_id"] = self.getcatid(annotation["category_id"])
 
-    def image(self, data, num, json_file):
+    def image(self, data, num):
         image = {}
         img = utils.img_b64_to_arr(data["imageData"])
         height, width = img.shape[:2]
@@ -54,7 +55,7 @@ class labelme2coco(object):
         image["height"] = height
         image["width"] = width
         image["id"] = num
-        image["file_name"] = json_file
+        image["file_name"] = os.path.join(self.dir_name, data["imagePath"])
 
         self.height = height
         self.width = width
@@ -64,7 +65,7 @@ class labelme2coco(object):
     def category(self, label):
         category = {}
         category["supercategory"] = label
-        category["id"] = len(self.categories)
+        category["id"] = len(self.categories)+1
         category["name"] = label
         return category
 
@@ -73,13 +74,17 @@ class labelme2coco(object):
         contour = np.array(points)
         x = contour[:, 0]
         y = contour[:, 1]
-        area = 0.5 * np.abs(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1)))
-        annotation["segmentation"] = [list(np.asarray(points).flatten())]
+        area = self.height * self.width
+        annotation["bbox"] = list(map(float, self.getbbox(points)))
+        x = annotation['bbox'][0]
+        y = annotation['bbox'][1]
+        w = annotation['bbox'][2]
+        h = annotation['bbox'][3]
+        annotation['segmentation'] = [[x, y, x+w, y, x+w, y+h, x, y+h]] # at least 6 points
+
         annotation["iscrowd"] = 0
         annotation["area"] = area
         annotation["image_id"] = num
-
-        annotation["bbox"] = list(map(float, self.getbbox(points)))
 
         annotation["category_id"] = label  # self.getcatid(label)
         annotation["id"] = self.annID
