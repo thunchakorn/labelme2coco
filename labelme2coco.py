@@ -3,6 +3,7 @@ import argparse
 import json
 
 from labelme import utils
+import labelme
 import numpy as np
 import glob
 import PIL.Image
@@ -25,7 +26,7 @@ class labelme2coco(object):
         self.height = 0
         self.width = 0
 
-        self.save_json()
+#        self.save_json()
 
     def data_transfer(self):
         for num, json_file in enumerate(self.labelme_json):
@@ -37,7 +38,8 @@ class labelme2coco(object):
                     if label not in self.label:
                         self.label.append(label)
                     points = shapes["points"]
-                    self.annotations.append(self.annotation(points, label, num))
+                    shape_type = shapes['shape_type']
+                    self.annotations.append(self.annotation(points, label, num, shape_type))
                     self.annID += 1
 
         # Sort all text labels so they are in the same order across data splits.
@@ -69,19 +71,22 @@ class labelme2coco(object):
         category["name"] = label
         return category
 
-    def annotation(self, points, label, num):
+    def annotation(self, points, label, num, shape_type):
         annotation = {}
         contour = np.array(points)
         x = contour[:, 0]
         y = contour[:, 1]
         area = self.height * self.width
-        annotation["bbox"] = list(map(float, self.getbbox(points)))
+        annotation["bbox"] = list(map(float, self.getbbox(points, shape_type)))
         x = annotation['bbox'][0]
         y = annotation['bbox'][1]
         w = annotation['bbox'][2]
         h = annotation['bbox'][3]
-        annotation['segmentation'] = [[x, y, x+w, y, x+w, y+h, x, y+h]] # at least 6 points
-
+        if shape_type == 'rectangle':
+            annotation['segmentation'] = [[x, y, x+w, y, x+w, y+h, x, y+h]] # at least 6 points
+        elif shape_type == 'polygon':
+            points = np.asarray(points).flatten().tolist()
+            annotation['segmentation'] = points
         annotation["iscrowd"] = 0
         annotation["area"] = area
         annotation["image_id"] = num
@@ -98,7 +103,7 @@ class labelme2coco(object):
         exit()
         return -1
 
-    def getbbox(self, points):
+    def getbbox(self, points, shape_type):
         polygons = points
         mask = self.polygons_to_mask([self.height, self.width], polygons)
         return self.mask2box(mask)
