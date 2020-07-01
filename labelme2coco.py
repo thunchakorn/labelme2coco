@@ -26,7 +26,7 @@ class labelme2coco(object):
         self.height = 0
         self.width = 0
 
-#        self.save_json()
+       self.save_json()
 
     def data_transfer(self):
         for num, json_file in enumerate(self.labelme_json):
