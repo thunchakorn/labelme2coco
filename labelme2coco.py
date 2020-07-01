@@ -85,7 +85,7 @@ class labelme2coco(object):
         if shape_type == 'rectangle':
             annotation['segmentation'] = [[x, y, x+w, y, x+w, y+h, x, y+h]] # at least 6 points
         elif shape_type == 'polygon':
-            points = np.asarray(points).flatten().tolist()
+            points = [np.asarray(points).flatten().tolist()]
             annotation['segmentation'] = points
         annotation["iscrowd"] = 0
         annotation["area"] = area
