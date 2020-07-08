@@ -161,7 +161,7 @@ if __name__ == "__main__":
         description="labelme annotation to coco data json file."
     )
     parser.add_argument(
-        "labelme_images",
+        "labelme_directory",
         help="Directory to labelme images and annotation json files.",
         type=str,
     )
@@ -169,5 +169,5 @@ if __name__ == "__main__":
         "--output", help="Output json file path.", default="trainval.json"
     )
     args = parser.parse_args()
-    labelme_json = glob.glob(os.path.join(args.labelme_images, "*.json"))
+    labelme_json = glob.glob(os.path.join(args.labelme_directory, "*.json"))
     labelme2coco(labelme_json, args.output)
