@@ -1,3 +1,2 @@
-labelme
 numpy
 pillow

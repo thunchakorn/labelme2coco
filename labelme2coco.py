@@ -2,12 +2,10 @@ import os
 import argparse
 import json
 
-from labelme import utils
-import labelme
 import numpy as np
 import glob
 import PIL.Image
-
+from PIL import ImageDraw
 
 class labelme2coco(object):
     def __init__(self, labelme_json=[], save_json_path="./coco.json"):
@@ -51,9 +49,7 @@ class labelme2coco(object):
 
     def image(self, data, num):
         image = {}
-        img = utils.img_b64_to_arr(data["imageData"])
-        height, width = img.shape[:2]
-        img = None
+        height, width = data['imageHeight'], data['imageWidth']
         image["height"] = height
         image["width"] = width
         image["id"] = num

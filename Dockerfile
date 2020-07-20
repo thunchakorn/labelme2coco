@@ -1,5 +1,4 @@
 FROM python:3.8-slim-buster
-
 WORKDIR /app
 
 COPY labelme2coco.py /
@@ -10,4 +9,5 @@ RUN apt-get update
 RUN apt-get install -y libgl1-mesa-dev 
 
 ENTRYPOINT ["python", "labelme2coco.py"]
-# e.g. docker run --rm -it -v ${pwd}/test_polygon:/app/test_polygon thunchakorn/labelme2coco test_polygon/train --o test_polygon/train.json
+# e.g. docker run --rm -it -v ${pwd}/test_polygon:/app/test_polygon labelme2coco
+# python labelme2coco.py test_polygon/train --o test_polygon/train.json
