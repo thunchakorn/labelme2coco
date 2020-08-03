@@ -1,6 +1,7 @@
 import os
 import argparse
 import json
+import pickle
 
 import numpy as np
 import glob
@@ -148,6 +149,9 @@ class labelme2coco(object):
             os.path.dirname(os.path.abspath(self.save_json_path)), exist_ok=True
         )
         json.dump(self.data_coco, open(self.save_json_path, "w"), indent=4)
+        cat_path = os.path.join(os.path.split(self.save_json_path)[0], 'classes.txt')
+        with open(cat_path, 'wb') as f:
+            pickle.dump(self.label, f)
 
 
 if __name__ == "__main__":
