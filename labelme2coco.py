@@ -8,7 +8,7 @@ import PIL.Image
 from PIL import ImageDraw
 
 class labelme2coco(object):
-    def __init__(self, labelme_json=[], save_json_path="./coco.json"):
+    def __init__(self, labelme_json=[], save_json_path="./coco.json", thing_classes = None):
         """
         :param labelme_json: the list of all labelme json file paths
         :param save_json_path: the path to save new json
@@ -23,6 +23,7 @@ class labelme2coco(object):
         self.annID = 1
         self.height = 0
         self.width = 0
+        self.thing_classes = thing_classes
 
         self.save_json()
 
@@ -148,9 +149,9 @@ class labelme2coco(object):
             os.path.dirname(os.path.abspath(self.save_json_path)), exist_ok=True
         )
         json.dump(self.data_coco, open(self.save_json_path, "w"), indent=4)
-        cat_path = os.path.join(os.path.split(self.save_json_path)[0], 'classes.txt')
-        with open(cat_path, 'wb') as f:
-            f.writelines(map(lambda x: x + '\n' + x, self.label))
+        if self.thing_classes is not None:
+            with open(self.thing_classes, 'wb') as f:
+                f.writelines(map(lambda x: x + '\n' + x, self.label))
 
 
 if __name__ == "__main__":
@@ -169,9 +170,15 @@ if __name__ == "__main__":
         type=str
     )
     parser.add_argument(
-        "--output", help="Output json file path.", default="trainval.json"
+        "output", help="Output json file path.", default="trainval.json"
+    )
+
+    parser.add_argument('-t'
+        '--thing_classes',
+        default=None,
+        help = 'file name of .txt file that store classes name'
     )
 
     args = parser.parse_args()
     labelme_json = glob.glob(os.path.join(args.labelme_directory, "*.json"))
-    labelme2coco(labelme_json, args.output)
+    labelme2coco(labelme_json, args.output, args.thing_classes)
