@@ -150,8 +150,8 @@ class labelme2coco(object):
         )
         json.dump(self.data_coco, open(self.save_json_path, "w"), indent=4)
         if self.thing_classes is not None:
-            with open(self.thing_classes, 'wb') as f:
-                f.writelines(map(lambda x: x + '\n' + x, self.label))
+            with open(self.thing_classes, 'w') as f:
+                f.writelines(map(lambda x: x + '\n', self.label))
 
 
 if __name__ == "__main__":
@@ -173,7 +173,7 @@ if __name__ == "__main__":
         "output", help="Output json file path.", default="trainval.json"
     )
 
-    parser.add_argument('-t'
+    parser.add_argument('-t',
         '--thing_classes',
         default=None,
         help = 'file name of .txt file that store classes name'
